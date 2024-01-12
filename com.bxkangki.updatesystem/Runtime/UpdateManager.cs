@@ -6,12 +6,20 @@ namespace UpdateSystem {
         private static readonly List<IUpdate> updates = new List<IUpdate>(1);
         private static readonly List<IFixedUpdate> fixedUpdates = new List<IFixedUpdate>(1);
         private static readonly List<ILateUpdate> lateUpdates = new List<ILateUpdate>(1);
+        private static readonly List<IUnscaleUpdate> unscaleUpdates = new List<IUnscaleUpdate>(1);
+        private static readonly List<IUnscaleLateUpdate> unscaleLateUpdates = new List<IUnscaleLateUpdate>(1);
+        private static readonly List<ITickUpdate> tickUpdates = new List<ITickUpdate>(1);
 
         private static UniTaskCancellation cancel = new UniTaskCancellation();
 
         public static void Update() {
-            for (int i = 0; i < updates.Count; i++) {
-                updates[i].OnUpdate();
+            if (TimeSystem.TimeScale > 0f) {
+                for (int i = 0; i < updates.Count; i++) {
+                    updates[i].OnUpdate();
+                }
+            }
+            for (int i = 0; i < unscaleUpdates.Count; i++) {
+                unscaleUpdates[i].OnUnscaleUpdate();
             }
         }
 
@@ -22,13 +30,30 @@ namespace UpdateSystem {
         }
 
         public static void LateUpdate() {
-            for (int i = 0; i < lateUpdates.Count; i++) {
-                lateUpdates[i].OnLateUpdate();
+            if (TimeSystem.TimeScale > 0f) {
+                for (int i = 0; i < lateUpdates.Count; i++) {
+                    lateUpdates[i].OnLateUpdate();
+                }
+            }
+            for (int i = 0; i < unscaleLateUpdates.Count; i++) {
+                unscaleLateUpdates[i].OnUnscaleLateUpdate();
             }
         }
 
+
+        private static async UniTaskVoid TickUpdate() {
+            for (;;) {
+                for (int i = 0; i < tickUpdates.Count; i++) {
+                    tickUpdates[i].OnTickUpdate();
+                }
+                await UniTask.Delay(TimeSystem.Tick, cancellationToken: cancel.Disable.Token);
+            }
+        }
+
+
         public static void OnEnable() {
             cancel.OnEnable();
+            TickUpdate().Forget();
         }
 
         public static void OnDisable() {
@@ -42,35 +67,33 @@ namespace UpdateSystem {
 
         public static class Add {
             public static void Update(IUpdate value) {
-                AddUpdate(value).Forget();
+                AddUpdate<IUpdate>(updates, value).Forget();
             }
 
             public static void FixedUpdate(IFixedUpdate value) {
-                AddFixedUpdate(value).Forget();
+                AddUpdate<IFixedUpdate>(fixedUpdates, value).Forget();
             }
 
             public static void LateUpdate(ILateUpdate value) {
-                AddLateUpdate(value).Forget();
+                AddUpdate<ILateUpdate>(lateUpdates, value).Forget();
             }
 
-            private static async UniTaskVoid AddUpdate(IUpdate value) {
-                await UniTask.NextFrame(cancellationToken: cancel.Disable.Token);
-                if (!updates.Contains(value)) {
-                    updates.Add(value);
-                }
+            public static void UnscaleUpdate(IUnscaleUpdate value) {
+                AddUpdate<IUnscaleUpdate>(unscaleUpdates, value).Forget();
             }
 
-            private static async UniTaskVoid AddFixedUpdate(IFixedUpdate value) {
-                await UniTask.NextFrame(cancellationToken: cancel.Disable.Token);
-                if (!fixedUpdates.Contains(value)) {
-                    fixedUpdates.Add(value);
-                }
+            public static void UnscaleLateUpdate(IUnscaleLateUpdate value) {
+                AddUpdate<IUnscaleLateUpdate>(unscaleLateUpdates, value).Forget();
             }
 
-            private static async UniTaskVoid AddLateUpdate(ILateUpdate value) {
+            public static void TickUpdate(ITickUpdate value) {
+                AddUpdate<ITickUpdate>(tickUpdates, value).Forget();
+            }
+
+            private static async UniTaskVoid AddUpdate<T>(List<T> list, T value) {
                 await UniTask.NextFrame(cancellationToken: cancel.Disable.Token);
-                if (!lateUpdates.Contains(value)) {
-                    lateUpdates.Add(value);
+                if (!list.Contains(value)) {
+                    list.Add(value);
                 }
             }
         }
@@ -92,6 +115,24 @@ namespace UpdateSystem {
             public static void LateUpdate(ILateUpdate value) {
                 if (lateUpdates.Contains(value)) {
                     lateUpdates.Remove(value);
+                }
+            }
+
+            public static void UnscaleUpdate(IUnscaleUpdate value) {
+                if (unscaleUpdates.Contains(value)) {
+                    unscaleUpdates.Remove(value);
+                }
+            }
+
+            public static void UnscaleLateUpdate(IUnscaleLateUpdate value) {
+                if (unscaleLateUpdates.Contains(value)) {
+                    unscaleLateUpdates.Remove(value);
+                }
+            }
+
+            public static void TickUpdate(ITickUpdate value) {
+                if (tickUpdates.Contains(value)) {
+                    tickUpdates.Remove(value);
                 }
             }
         }
