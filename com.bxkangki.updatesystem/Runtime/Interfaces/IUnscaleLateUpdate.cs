@@ -1,5 +1,7 @@
-namespace UpdateSystem {
-    public interface IUnscaleLateUpdate : IUpdateSystem {
+namespace UpdateSystem
+{
+    public interface IUnscaleLateUpdate : IUpdateSystem
+    {
         void OnUnscaleLateUpdate();
     }
 }

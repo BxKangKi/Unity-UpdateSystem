@@ -1,10 +1,12 @@
 using System.Threading;
 
-namespace Cysharp.Threading.Tasks {
+namespace Cysharp.Threading.Tasks
+{
     public class UniTaskCancellation : IUniTask
     {
         public static CancellationTokenSource GameExit = new CancellationTokenSource();
-        public static void OnGameExit() {
+        public static void OnGameExit()
+        {
             GameExit.Cancel();
             GameExit.Dispose();
         }
@@ -12,7 +14,8 @@ namespace Cysharp.Threading.Tasks {
         public CancellationTokenSource Disable = new CancellationTokenSource();
         public CancellationTokenSource Destroy = new CancellationTokenSource();
 
-        public void StopAllDisable() {
+        public void StopAllDisable()
+        {
             OnDisable();
             OnEnable();
         }

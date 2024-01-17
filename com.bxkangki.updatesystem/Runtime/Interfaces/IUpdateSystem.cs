@@ -1,5 +1,7 @@
-namespace UpdateSystem {
-    public interface IUpdateSystem {
+namespace UpdateSystem
+{
+    public interface IUpdateSystem
+    {
         void OnEnable();
         void OnDisable();
     }

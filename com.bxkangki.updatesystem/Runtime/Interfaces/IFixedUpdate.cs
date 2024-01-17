@@ -1,5 +1,7 @@
-namespace UpdateSystem {
-    public interface IFixedUpdate : IUpdateSystem {
+namespace UpdateSystem
+{
+    public interface IFixedUpdate : IUpdateSystem
+    {
         void OnFixedUpdate();
     }
 }

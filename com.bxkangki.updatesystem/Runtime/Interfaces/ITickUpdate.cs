@@ -1,5 +1,7 @@
-namespace UpdateSystem {
-    public interface ITickUpdate : IUpdateSystem {
+namespace UpdateSystem
+{
+    public interface ITickUpdate : IUpdateSystem
+    {
         void OnTickUpdate();
     }
 }

@@ -1,5 +1,7 @@
-namespace UpdateSystem {
-    public interface IUpdate : IUpdateSystem {
+namespace UpdateSystem
+{
+    public interface IUpdate : IUpdateSystem
+    {
         void OnUpdate();
     }
 }
